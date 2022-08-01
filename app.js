@@ -1,34 +1,53 @@
-const express = require('express');
+const express = require("express");
 
 const app = express();
 
-require('dotenv').config();
+require("dotenv").config();
 
-app.use(express.static(__dirname + '/images'))
+app.use(express.static(__dirname + "/images"));
 
+const vision = require("@google-cloud/vision");
 
-const vision = require('@google-cloud/vision');
+const client = new vision.ImageAnnotatorClient();
 
-const textDetect = async () => {
+const detectTEXT = async () => {
+  // const fileName = "/images/Screenshot.png";
 
-    const client = new vision.ImageAnnotatorClient();
+  const request = {
+    image: {
+      source: { imageUri: `gs://images/Screenshot.png` },
+    },
+  };
 
-    // const fileName = "/images/Screenshot.png";
+  const [result] = await client.textDetection(request);
 
-    const request = {
-        image: {
-            source: { imageUri: `gs://images/Screenshot.png` },
-        },
-    };
+  const detections = result.textAnnotations;
 
-    const [result] = await client.textDetection(request);
+  detections.forEach((text) => console.log(text));
+};
 
-    const detections = result.textAnnotations;
+detectTEXT();
 
-    detections.forEach(text => console.log(text))
-}
+const detectFACE = async () => {
+  const fileName = {
+    image: {
+      source: { imageUri: `gs://images/Screenshot.png` },
+    },
+  };
 
-textDetect();
-//
+  const [result] = await client.faceDetection(fileName);
 
-app.listen(5000,()=>console.log('Running'))
+  const faces = result.faceAnnotation;
+
+  faces.forEach((face, i) => {
+    console.log(`  Face #${i + 1}:`);
+    console.log(`    Joy: ${face.joyLikelihood}`);
+    console.log(`    Anger: ${face.angerLikelihood}`);
+    console.log(`    Sorrow: ${face.sorrowLikelihood}`);
+    console.log(`    Surprise: ${face.surpriseLikelihood}`);
+  });
+};
+
+detectFACE()
+
+app.listen(5000, () => console.log("Running"));
