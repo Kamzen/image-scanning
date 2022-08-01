@@ -1,0 +1,1 @@
+const GOOGLE_APPLICATION_CREDENTIALS = "C:/Users/ThembaMakamu/Downloads/image-scanning-358112-7a35e748e417.json";
